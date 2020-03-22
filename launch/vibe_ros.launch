@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="vibe_ros" type="vibe_ros" name="vibe_ros" output="screen"/>
+</launch>
