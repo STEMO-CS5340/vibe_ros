@@ -7,8 +7,8 @@
 
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
-#include <message_filters/sync_policies/exact_time.h>
-// #include <message_filters/sync_policies/approximate_time.h>
+// #include <message_filters/sync_policies/exact_time.h>
+#include <message_filters/sync_policies/approximate_time.h>
 #include <image_transport/subscriber_filter.h>
 
 
@@ -42,9 +42,12 @@ private:
 	ros::WallTimer check_synced_timer_;
 	int left_received_, right_received_, left_info_received_, right_info_received_, all_received_;
 
-	typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, sensor_msgs::Image, sensor_msgs::CameraInfo, sensor_msgs::CameraInfo> ExactPolicy;
-	typedef message_filters::Synchronizer<ExactPolicy> ExactSync;
-	ExactSync exact_sync_;
+	// typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, sensor_msgs::Image, sensor_msgs::CameraInfo, sensor_msgs::CameraInfo> ExactPolicy;
+	typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image, sensor_msgs::CameraInfo, sensor_msgs::CameraInfo> ApproximatePolicy;
+	// typedef message_filters::Synchronizer<ExactPolicy> ExactSync;
+	typedef message_filters::Synchronizer<ApproximatePolicy> ApproximateSync;
+	// ExactSync exact_sync_;
+	ApproximateSync approximate_sync_;
 
 	// for sync checking
 	static void increment(int* value){ ++(*value); }
@@ -104,7 +107,7 @@ protected:
 
 	StereoProcessor(const Parameters& param) :  param(param), 
 		left_received_(0), right_received_(0), left_info_received_(0), right_info_received_(0), all_received_(0), 
-		exact_sync_(ExactPolicy(param.queue_size), left_sub_, right_sub_, left_info_sub_, right_info_sub_)
+		approximate_sync_(ApproximatePolicy(param.queue_size), left_sub_, right_sub_, left_info_sub_, right_info_sub_)
 	{
 		// Read local parameters
 		ros::NodeHandle local_nh("~");
@@ -133,7 +136,7 @@ protected:
 				boost::bind(&StereoProcessor::checkInputsSynchronized, this));
 
 		// Synchronize input topics.
-		exact_sync_.registerCallback(boost::bind(&StereoProcessor::dataCb, this, _1, _2, _3, _4));
+		approximate_sync_.registerCallback(boost::bind(&StereoProcessor::dataCb, this, _1, _2, _3, _4));
 	}
 
 	/**

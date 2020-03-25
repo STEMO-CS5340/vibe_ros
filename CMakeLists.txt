@@ -60,6 +60,7 @@ add_subdirectory(include)
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(vibe_ros
     vibe_ros_node.cpp
+    ros_publisher.cpp
     # vibe_ros.cpp
     )
 
